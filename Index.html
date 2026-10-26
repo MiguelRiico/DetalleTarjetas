@@ -95,7 +95,7 @@
     <!-- Script de Conexión -->
     <script>
         // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT (Termina en /exec)
-        const API_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+        const API_URL = "https://script.google.com/macros/s/AKfycbysXUtieAzJfOTJhK2pbUCRfexdhO4fVLNianLC5DZADl3jrB1N3Y7LYhxhUXvAHYsu/exec";
 
         async function consultarCurp() {
             const curp = document.getElementById('curpInput').value.trim().toUpperCase();
@@ -111,8 +111,9 @@
             consoleOut.innerText = `Enviando consulta para CURP: ${curp}...`;
             resultadoCard.classList.add('hidden');
 
-            if (API_URL.includes("https://script.google.com/macros/s/AKfycbysXUtieAzJfOTJhK2pbUCRfexdhO4fVLNianLC5DZADl3jrB1N3Y7LYhxhUXvAHYsu/exec")) {
-                consoleOut.innerText = `Error: Debe configurar la variable API_URL con su enlace de Google Apps Script.`;
+            // Validación ajustada para verificar si sigue con el texto predeterminado o vacío
+            if (API_URL.includes("TU_URL_") || !API_URL.startsWith("http")) {
+                consoleOut.innerText = `Error: Debe configurar la variable API_URL con su enlace válido de Google Apps Script.`;
                 return;
             }
 
@@ -150,7 +151,7 @@
             } catch (error) {
                 consoleOut.innerText = `Error de conexión con el servidor: ${error.message}`;
                 resultadoCard.classList.remove('hidden');
-                resultadoContent.innerHTML = `<p class="text-red-600 font-bold">Error al conectar con la base de datos de Google Sheets. Verifique la URL de Apps Script.</p>`;
+                resultadoContent.innerHTML = `<p class="text-red-600 font-bold">Error al conectar con la base de datos de Google Sheets. Verifique la URL de Apps Script y los permisos de implementación web.</p>`;
             }
         }
 
