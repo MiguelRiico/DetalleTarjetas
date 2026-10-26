@@ -20,33 +20,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-    <!-- PANTALLA DE LOGIN -->
-    <div id="loginView" class="fixed inset-0 bg-slate-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border-t-8 border-gob-primary space-y-6">
-            <div class="text-center space-y-2">
-                <div class="inline-block bg-[#691C32] text-white text-xs font-bold px-3 py-1 rounded">GOBIERNO DE MÉXICO</div>
-                <h2 class="text-xl font-bold text-gray-800">Servidor Educativo - SARE 1523</h2>
-                <p class="text-xs text-gray-500">Ingrese sus credenciales institucionales para acceder al sistema</p>
-            </div>
-            <form onsumit="event.preventDefault(); validarLogin();" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Usuario</label>
-                    <input type="text" id="userInput" placeholder="Ej. admin_sare" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#691C32]">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Contraseña</label>
-                    <input type="password" id="passInput" placeholder="••••••••" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#691C32]">
-                </div>
-                <button type="submit" class="w-full btn-gob text-white font-medium py-3 rounded-lg shadow text-sm">
-                    Iniciar Sesión
-                </button>
-            </form>
-            <p id="loginError" class="text-xs text-red-600 text-center font-medium hidden">Usuario o contraseña incorrectos.</p>
-        </div>
-    </div>
-
     <!-- HEADER INSTITUCIONAL -->
     <header class="bg-gob-primary text-white shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -56,11 +29,11 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-semibold leading-tight">Servidor Educativo - SARE 1523</h1>
-                    <p class="text-xs text-red-200">Versión 2.0 (Validador con Escáner)</p>
+                    <p class="text-xs text-red-200">Versión 2.1 (Validador Directo)</p>
                 </div>
             </div>
-            <button onclick="cerrarSesion()" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs px-4 py-2 rounded shadow">
-                Salir
+            <button onclick="limpiarFormulario()" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs px-4 py-2 rounded shadow">
+                Reiniciar
             </button>
         </div>
     </header>
@@ -143,25 +116,6 @@
         let videoStream = null;
         let scanningInterval = null;
 
-        function validarLogin() {
-            const user = document.getElementById('userInput').value.trim();
-            const pass = document.getElementById('passInput').value.trim();
-            
-            // Puedes cambiar tus credenciales de acceso aquí si lo deseas
-            if (user === "sare1523" && pass === "bienestar2026") {
-                document.getElementById('loginView').classList.add('hidden');
-                document.getElementById('curpInput').focus();
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
-            }
-        }
-
-        function cerrarSesion() {
-            if(confirm("¿Desea cerrar sesión?")) {
-                window.location.reload();
-            }
-        }
-
         async function consultarCurp() {
             let curp = document.getElementById('curpInput').value.trim().toUpperCase();
             const consoleOut = document.getElementById('consoleOutput');
@@ -210,7 +164,7 @@
 
             } catch (error) {
                 consoleOut.innerText = `Error de conexión: ${error.message}`;
-                resultadoCard.classList.remove('hidden');
+                resultadoCard.classList.add('hidden');
                 resultadoContent.innerHTML = `<p class="text-red-600 font-bold">Error al conectar con Google Sheets. Verifique la red o permisos.</p>`;
             }
         }
