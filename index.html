@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-semibold leading-tight">Servidor Educativo - SARE 1523</h1>
-                    <p class="text-xs text-red-200">Versión 2.1 (Validador Directo)</p>
+                    <p class="text-xs text-red-200">Versión 2.2 (Validador con QR Condicional)</p>
                 </div>
             </div>
             <button onclick="limpiarFormulario()" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs px-4 py-2 rounded shadow">
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <!-- MODAL / CONTENEDOR DE CÁMARA (Oculto por defecto) -->
+        <!-- MODAL DE CÁMARA -->
         <div id="scannerContainer" class="bg-black rounded-xl p-4 shadow-inner text-center hidden space-y-3">
             <div class="flex justify-between items-center text-white px-2">
                 <span class="text-xs font-mono">Apunta la cámara al código QR del CURP</span>
@@ -94,6 +94,15 @@
                 <!-- Se llena dinámicamente -->
             </div>
 
+            <!-- Contenedor del QR Condicional -->
+            <div id="qrContainer" class="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-xl text-center hidden space-y-2">
+                <p class="text-xs font-bold text-gray-700 uppercase">⚠️ Aviso Importante / Código Requerido:</p>
+                <div class="flex justify-center">
+                    <img id="qrImage" src="qr_especial.png" alt="Código QR institucional" class="w-48 h-48 object-contain border-2 border-amber-500 rounded-lg shadow-md">
+                </div>
+                <p class="text-xs text-slate-500">Escanee este código para continuar con el trámite correspondiente.</p>
+            </div>
+
             <div class="mt-6 pt-4 border-t border-gray-100 flex justify-end">
                 <button onclick="limpiarFormulario()" class="btn-gob text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow">
                     Consultar nuevo CURP
@@ -110,8 +119,7 @@
 
     <!-- Script General y de Conexión -->
     <script>
-        // TU ENLACE DE GOOGLE APPS SCRIPT
-        const API_URL = "https://script.google.com/macros/s/AKfycbysXUtieAzJfOTJhK2pbUCRfexdhO4fVLNianLC5DZADl3jrB1N3Y7LYhxhUXvAHYsu/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwFEBcwbha7FGFUNZj013PtxNUcdM7ao6x_bpJXeFK-qsyoDOQCpgZb70nFP1YZutZQ/exec";
 
         let videoStream = null;
         let scanningInterval = null;
@@ -121,8 +129,8 @@
             const consoleOut = document.getElementById('consoleOutput');
             const resultadoCard = document.getElementById('resultadoCard');
             const resultadoContent = document.getElementById('resultadoContent');
+            const qrContainer = document.getElementById('qrContainer');
 
-            // Validación estricta de 18 caracteres
             if (curp.length !== 18) {
                 alert("El CURP debe contener exactamente 18 caracteres alfanuméricos.");
                 document.getElementById('curpInput').focus();
@@ -131,6 +139,7 @@
 
             consoleOut.innerText = `Enviando consulta para CURP: ${curp}...`;
             resultadoCard.classList.add('hidden');
+            qrContainer.classList.add('hidden');
 
             try {
                 const response = await fetch(`${API_URL}?curp=${encodeURIComponent(curp)}`);
@@ -150,6 +159,12 @@
                         <p><strong>RESULTADO VERIFICACIÓN:</strong> <span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">${data.verificacion}</span></p>
                         <p class="text-base mt-2"><strong>SOLUCIÓN / DICTAMEN:</strong> <span class="bg-emerald-100 text-emerald-800 font-extrabold px-2 py-1 rounded">${data.solucion}</span></p>
                     `;
+
+                    // Verificar si la columna F indica SÍ para mostrar el QR
+                    if (data.mostrarQr === "SÍ" || data.mostrarQr === "SI") {
+                        qrContainer.classList.remove('hidden');
+                    }
+
                 } else {
                     resultadoCard.classList.remove('border-emerald-500');
                     resultadoCard.classList.add('border-red-500');
@@ -169,7 +184,6 @@
             }
         }
 
-        // --- FUNCIONES DE CÁMARA Y EXTRACCIÓN DE 18 CARACTERES ---
         async function iniciarEscanner() {
             const container = document.getElementById('scannerContainer');
             const video = document.getElementById('videoPreview');
@@ -213,12 +227,11 @@
                     let textoEscaneado = code.data.trim().toUpperCase();
                     status.innerText = "¡Código detectado con éxito!";
                     
-                    // Extraer los primeros 18 caracteres exactos del texto del QR
                     if (textoEscaneado.length >= 18) {
                         let curpExtraido = textoEscaneado.substring(0, 18);
                         document.getElementById('curpInput').value = curpExtraido;
                         detenerEscanner();
-                        consultarCurp(); // Ejecuta la búsqueda automáticamente
+                        consultarCurp();
                         return;
                     } else {
                         status.innerText = "El QR escaneado tiene menos de 18 caracteres.";
@@ -245,6 +258,7 @@
             document.getElementById('curpInput').value = '';
             document.getElementById('consoleOutput').innerText = 'Consola limpia. Esperando consulta...';
             document.getElementById('resultadoCard').classList.add('hidden');
+            document.getElementById('qrContainer').classList.add('hidden');
             document.getElementById('curpInput').focus();
         }
     </script>
